@@ -16,8 +16,15 @@ htmlcov/
 .ipynb_checkpoints/
 
 # Data (keep structure via .gitkeep)
-data/docs/*
-!data/docs/.gitkeep
+data/**
+!data/
+!data/reference/
+!data/reference/.gitkeep
+!data/qa/
+!data/qa/question/
+!data/qa/question/.gitkeep
+!data/qa/answer/
+!data/qa/answer/.gitkeep
 
 # macOS
 .DS_Store
