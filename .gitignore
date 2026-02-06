@@ -1,0 +1,23 @@
+# Environment & secrets
+.env
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.coverage
+coverage.xml
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (keep structure via .gitkeep)
+data/docs/*
+!data/docs/.gitkeep
+
+# macOS
+.DS_Store
