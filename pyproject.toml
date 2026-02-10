@@ -20,8 +20,12 @@ dev = [
   "jupyterlab",
   "ipykernel",
   "ruff",
+  "mypy",
+  "pydoclint",
   "pytest",
   "pytest-cov",
+  "poethepoet",
+  "types-requests",
 ]
 
 [build-system]
@@ -30,6 +34,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src", "scripts"]
+include = ["scripts/**"]
 
 [tool.ruff]
 target-version = "py312"
@@ -51,3 +56,15 @@ exclude_lines = [
   "def __repr__",
   "raise NotImplementedError",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+disable_error_code = ["import-untyped"]
+
+[tool.poe.tasks]
+lint = { cmd = "python -m scripts.check lint", help = "Run lint / format / static analysis (via scripts.check)" }
+test = { cmd = "python -m scripts.check test", help = "Run tests with coverage (via scripts.check)" }
+all = { cmd = "python -m scripts.check all", help = "Run all checks (lint + test)" }
