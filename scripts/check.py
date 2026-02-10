@@ -1,63 +1,73 @@
-"""CLI for lint, format, and test."""
-
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
+from typing import List
 
 
-def _run(cmd: list[str]) -> int:
-    result = subprocess.run(cmd)
+def _run(cmd: List[str]) -> int:
+    """Run a command and return its exit code."""
+    print(f"+ {' '.join(cmd)}")
+    try:
+        result = subprocess.run(cmd, check=False)
+    except KeyboardInterrupt:
+        return 1
     return result.returncode
 
 
-def _lint(*, fix: bool = False) -> int:
-    cmd = [sys.executable, "-m", "ruff", "check", "src", "scripts", "tests"]
-    if fix:
-        cmd.append("--fix")
-    return _run(cmd)
+def cmd_lint() -> int:
+    """Run linting / formatting / static analysis."""
+    exit_code = 0
+
+    # Ruff: lint (with auto-fix) + format
+    if (code := _run(["ruff", "check", "--fix", "src", "scripts", "tests"])) != 0:
+        exit_code = code
+    if (code := _run(["ruff", "format", "src", "scripts", "tests"])) != 0:
+        exit_code = code
+
+    # mypy: type checking
+    if (code := _run(["mypy", "src", "tests"])) != 0:
+        exit_code = code
+
+    # pydoclint: docstring check
+    if (code := _run(["pydoclint", "src", "tests"])) != 0:
+        exit_code = code
+
+    return exit_code
 
 
-def _format(*, check_only: bool = False) -> int:
-    cmd = [sys.executable, "-m", "ruff", "format", "src", "scripts", "tests"]
-    if check_only:
-        cmd.append("--check")
-    return _run(cmd)
+def cmd_test() -> int:
+    """Run tests with coverage."""
+    return _run(["pytest", "tests", "-v", "--cov=src"])
 
 
-def _test(*, coverage: bool = False) -> int:
-    cmd = [sys.executable, "-m", "pytest", "tests", "-v"]
-    if coverage:
-        cmd.extend(["--cov=src", "--cov-report=term-missing"])
-    return _run(cmd)
+def cmd_all() -> int:
+    """Run all checks (lint + test)."""
+    code_lint = cmd_lint()
+    code_test = cmd_test()
+    return 0 if code_lint == 0 and code_test == 0 else 1
 
 
-def main() -> int:
-    if len(sys.argv) < 2:
-        print("Usage: check <lint|format|test|all> [options]")
-        print("  lint   - Run ruff check (use --fix to auto-fix)")
-        print("  format - Run ruff format (use --check to check only)")
-        print("  test   - Run pytest (use --cov for coverage)")
-        print("  all    - Run format, lint, test (with coverage)")
-        return 1
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Code quality and test helper CLI.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    command = sys.argv[1].lower()
-    args = sys.argv[2:]
+    subparsers.add_parser("lint", help="Run lint / format / static analysis.")
+    subparsers.add_parser("test", help="Run tests with coverage.")
+    subparsers.add_parser("all", help="Run all checks (lint + test).")
 
-    if command == "lint":
-        return _lint(fix="--fix" in args)
-    if command == "format":
-        return _format(check_only="--check" in args)
-    if command == "test":
-        return _test(coverage="--cov" in args or "--coverage" in args)
-    if command == "all":
-        if _format() != 0:
-            return 1
-        if _lint(fix=True) != 0:
-            return 1
-        return _test(coverage=True)
+    args = parser.parse_args(argv)
 
-    print(f"Unknown command: {command}", file=sys.stderr)
+    if args.command == "lint":
+        return cmd_lint()
+    if args.command == "test":
+        return cmd_test()
+    if args.command == "all":
+        return cmd_all()
+
+    # Fallback (should not be reached)
+    parser.print_help()
     return 1
 
 
