@@ -1,8 +1,8 @@
 # rag-evaluator
 
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/Mamo1031/rag-evaluator/actions/workflows/ci.yml/badge.svg)](https://github.com/Mamo1031/rag-evaluator/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Mamo1031/rag-evaluator/graph/badge.svg)](https://codecov.io/gh/Mamo1031/rag-evaluator)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 
 Utilities for generating reference answers from documents via an API and using them for RAG (Retrieval-Augmented Generation) evaluation.
 
