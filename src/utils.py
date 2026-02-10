@@ -21,6 +21,8 @@ def load_config() -> Config:
     host = os.getenv("HOST")
     api_key = os.getenv("API_KEY")
     project_id = os.getenv("PROJECT_ID")
+    if not host:
+        raise RuntimeError("HOST is not set (check your .env file).")
     if not api_key:
         raise RuntimeError("API_KEY is not set (check your .env file).")
     if not project_id:
